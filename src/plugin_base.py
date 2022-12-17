@@ -1,5 +1,5 @@
 import logging
-from src.error import NoStartEvent
+from error import NoStartEvent
 from utils import send_group_msg, send_private_msg, get_msg, delete_msg
 
 

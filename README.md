@@ -18,4 +18,4 @@
 
 2、clone本项目到本地，进入本项目目录(python-KucRobot)
 
-3、运行main.py
+3、在python-KucRobot-main中运行main.py

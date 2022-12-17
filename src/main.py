@@ -60,7 +60,7 @@ if __name__ == '__main__':
     from plugins_collection import PluginCollection
 
     logger = logging.getLogger('python-KucRobot')
-    logger.setLevel(level=logging.INFO)
+    logger.setLevel(level=logging.DEBUG)
     console = logging.StreamHandler()
     console.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s'))
     logger.addHandler(console)

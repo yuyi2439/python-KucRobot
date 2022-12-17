@@ -18,7 +18,7 @@ class Plugin:
         except NameError:
             self.name = 'unknown'
             self.version = 'unknown'
-        self.logger = logging.getLogger(f'__main__.{self.name}:{self.version}')
+        self.logger = logging.getLogger(f'python-KucRobot.{self.name}:{self.version}')
 
     def start_event(self):
         """

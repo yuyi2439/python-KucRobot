@@ -20,9 +20,7 @@ def send_group_msg(self, group_id, msg):
             msg_sender[msg_id] = self
             return msg_id
         else:
-            wording = d['wording']
-            logger.warning(f'插件 {self.name} 向群 {group_id} 发送消息 {msg} 失败, wording: {wording}')
-    raise NoMsg
+            raise NoMsg(1, self.name, group_id, msg, d['wording'])
 
 
 def send_private_msg(self, user_id, msg):
@@ -38,9 +36,7 @@ def send_private_msg(self, user_id, msg):
             msg_sender[msg_id] = self
             return msg_id
         else:
-            wording = d['wording']
-            logger.warning(f'插件 {self.name} 向用户 {user_id} 发送消息 {msg} 失败, wording: {wording}')
-    raise NoMsg
+            raise NoMsg(2, self.name, user_id, msg, d['wording'])
 
 
 def get_msg(self, msg_id):
@@ -54,9 +50,7 @@ def get_msg(self, msg_id):
         if d['status'] == 'ok':
             return d['data']
         else:
-            wording = d['wording']
-            logger.warning(f'插件 {self.name} 获取消息 {msg_id} 失败，wording: {wording}')
-    raise NoMsgId
+            raise NoMsgId(1, self.name, msg_id, d['wording'])
 
 
 def delete_msg(self, msg_id):
@@ -70,6 +64,4 @@ def delete_msg(self, msg_id):
         if d['status'] == 'ok':
             return d['data']
         else:
-            wording = d['wording']
-            logger.warning(f'插件 {self.name} 撤回消息 {msg_id} 失败, wording: {wording}')
-    raise NoMsgId
+            raise NoMsgId(2, self.name, msg_id, d['wording'])

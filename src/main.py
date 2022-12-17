@@ -9,12 +9,6 @@ ws_addr = 'ws://localhost:8080'
 http_addr = 'http://localhost:5700'
 version = '0.0.1'
 
-logger = logging.getLogger(__name__)
-logger.setLevel(level=logging.DEBUG)
-console = logging.StreamHandler()
-console.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s'))
-logger.addHandler(console)
-
 msg_sender = {}
 login_user_id = json.loads(requests.get(url=f'{http_addr}/get_login_info').content)['data']['user_id']
 
@@ -64,6 +58,12 @@ class InputThread(threading.Thread):
 
 if __name__ == '__main__':
     from plugins_collection import PluginCollection
+
+    logger = logging.getLogger('python-KucRobot')
+    logger.setLevel(level=logging.INFO)
+    console = logging.StreamHandler()
+    console.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s'))
+    logger.addHandler(console)
 
     logger.info(f'kuc_robot:{version}正在启动')
     my_plugins = PluginCollection('plugins')

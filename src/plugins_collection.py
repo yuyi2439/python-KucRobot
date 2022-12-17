@@ -16,7 +16,7 @@ class PluginCollection:
         self.plugins = []
         self.seen_paths = []
         self.plugin_package = plugin_package
-        self.logger = logging.getLogger('__main__.plugins_collection')
+        self.logger = logging.getLogger('python-KucRobot.plugins_collection')
         self.reload_plugins()
 
     def reload_plugins(self):

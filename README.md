@@ -16,6 +16,6 @@
 
 1、下载[go-cqhttp](https://github.com/Mrs4s/go-cqhttp)并部署
 
-2、clone本项目到本地，进入本项目目录(python-KucRobot)
+2、clone本项目到本地，进入src目录
 
 3、在python-KucRobot-main中运行main.py

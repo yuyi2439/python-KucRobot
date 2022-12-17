@@ -2,7 +2,7 @@ import logging
 import os
 import pkgutil
 import inspect
-from src.plugin_base import Plugin
+from plugin_base import Plugin
 from main import login_user_id, msg_sender
 from error import NoStartEvent, MsgTypeError
 

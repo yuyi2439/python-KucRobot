@@ -11,7 +11,12 @@
 * 让用户可以给插件设置优先级，按照优先级依次交由插件处理
 
 ## 食用(使用)方法
-
 * 下载[go-cqhttp](https://github.com/Mrs4s/go-cqhttp)并部署
 * clone本项目到本地，进入src目录
 * 运行 `python main.py`
+
+## 插件编写
+* 将plugin_base放在插件所在的文件夹(我用的PyCharm看不懂`sys.path.append('..')`)
+* 在插件中引入plugin_base中的Plugin类，创建一个类，使它继承Plugin类
+* 类中需要有__init__和start_event函数
+* __init__中需要声明self.name和self.version变量，然后super().__init__()

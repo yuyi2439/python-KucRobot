@@ -11,7 +11,7 @@
 * 让用户可以给插件设置优先级，按照优先级依次交由插件处理
 
 ## 食用(使用)方法
-* 下载[go-cqhttp](https://github.com/Mrs4s/go-cqhttp)并部署
+* 下载[go-cqhttp](https://github.com/Mrs4s/go-cqhttp)并部署(通讯方式选择0和2)
 * clone本项目到本地，进入src目录
 * 运行 `python main.py`
 

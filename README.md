@@ -19,4 +19,4 @@
 * 将plugin_base放在插件所在的文件夹(我用的PyCharm看不懂`sys.path.append('..')`)
 * 在插件中引入plugin_base中的Plugin类，创建一个类，使它继承Plugin类
 * 类中需要有__init__和start_event函数
-* __init__中需要声明self.name和self.version变量，然后super().__init__()
+* __init__中需要声明self.name和self.version变量，然后`super().__init__()`

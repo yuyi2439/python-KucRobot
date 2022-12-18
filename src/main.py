@@ -58,13 +58,9 @@ class InputThread(threading.Thread):
 
 
 if __name__ == '__main__':
+    from utils import get_logger
     from plugins_collection import PluginCollection
-
-    logger = logging.getLogger('python-KucRobot')
-    logger.setLevel(level=log_level)
-    console = logging.StreamHandler()
-    console.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s'))
-    logger.addHandler(console)
+    logger = get_logger('main')
 
     logger.info(f'kuc_robot:{version}正在启动')
     my_plugins = PluginCollection('plugins')

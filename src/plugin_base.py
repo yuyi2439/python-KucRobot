@@ -1,12 +1,16 @@
-import logging
-from error import NoStartEvent
-from utils import send_group_msg, send_private_msg, get_msg, delete_msg
+import error
+import plugin_utils
+import main
+from utils import get_logger
+
+login_user_id = main.login_user_id
 
 
 class Plugin:
     """
     该基类每个插件都需要继承，插件需要实现基类定义的方法
     """
+
     def __init__(self):
         """
         插件的基础信息
@@ -18,13 +22,13 @@ class Plugin:
         except NameError:
             self.name = 'unknown'
             self.version = 'unknown'
-        self.logger = logging.getLogger(f'python-KucRobot.{self.name}:{self.version}')
+        self.logger = get_logger(f'{self.name}:{self.version}')
 
     def start_event(self):
         """
         实际执行插件所初始化的方法
         """
-        raise NoStartEvent
+        raise error.NoStartEvent
 
     async def group_msg_event(self, sub_type, msg_id, user_id, msg, group_id, anonymous, reply_msg_id: int):
         """
@@ -45,3 +49,47 @@ class Plugin:
         :param msg: 消息内容
         :param temp_source: 临时会话来源
         """
+
+
+async def send_group_msg(self, group_id, msg):
+    """
+    :return: 成功返回msg_id
+    """
+    return await plugin_utils.send_group_msg(self, group_id, msg)
+
+
+async def send_private_msg(self, user_id, msg):
+    """
+    :return: 成功返回msg_id
+    """
+    return await plugin_utils.send_private_msg(self, user_id, msg)
+
+
+async def get_msg(self, msg_id):
+    """
+    :return: 成功返回data
+    """
+    return await plugin_utils.get_msg(self, msg_id)
+
+
+async def delete_msg(self, msg_id):
+    """
+    :return: 成功返回data
+    """
+    return await plugin_utils.delete_msg(self, msg_id)
+
+
+class NoMsg(error.NoMsg):
+    """
+    Msg缺失错误
+    """
+    def __init__(self):
+        super().__init__()
+
+
+class NoMsgId(error.NoMsgId):
+    """
+    MsgId缺失错误
+    """
+    def __init__(self):
+        super().__init__()

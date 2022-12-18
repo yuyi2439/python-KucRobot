@@ -4,7 +4,7 @@ import pkgutil
 import inspect
 from plugin_base import Plugin
 from main import login_user_id, msg_sender
-from error import NoStartEvent, MsgTypeError
+from error import NoStartEvent, MsgTypeError, NoMsg, NoMsgId
 
 
 class PluginCollection:
@@ -114,6 +114,10 @@ class PluginCollection:
                                                    kwargs['user_id'], kwargs['msg'])
             else:
                 raise MsgTypeError
+        except NoMsg:
+            pass
+        except NoMsgId:
+            pass
         except Exception as e:
             self.logger.error(f'执行插件 {plugin.name} 时出错: {e}')
         finally:

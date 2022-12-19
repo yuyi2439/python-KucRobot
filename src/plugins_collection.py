@@ -1,10 +1,10 @@
-import logging
 import os
 import pkgutil
 import inspect
 from plugin_base import Plugin
 from main import login_user_id, msg_sender
 from error import NoStartEvent, MsgTypeError, NoMsg, NoMsgId
+from utils import get_logger
 
 
 class PluginCollection:
@@ -16,7 +16,7 @@ class PluginCollection:
         self.plugins = []
         self.seen_paths = []
         self.plugin_package = plugin_package
-        self.logger = logging.getLogger('python-KucRobot.plugins_collection')
+        self.logger = get_logger('plugins_collection')
         self.reload_plugins()
 
     def reload_plugins(self):

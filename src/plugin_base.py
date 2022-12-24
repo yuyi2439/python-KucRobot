@@ -1,9 +1,7 @@
 import error
 import plugin_utils
 import main
-from utils import get_logger
-
-login_user_id = main.login_user_id
+from utils import get_logger, get_login_user_id
 
 
 class Plugin:
@@ -23,6 +21,7 @@ class Plugin:
             self.name = 'unknown'
             self.version = 'unknown'
         self.logger = get_logger(f'{self.name}:{self.version}')
+        self.login_user_id = get_login_user_id()
 
     def start_event(self):
         """

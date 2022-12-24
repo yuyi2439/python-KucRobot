@@ -2,9 +2,9 @@ import os
 import pkgutil
 import inspect
 from plugin_base import Plugin
-from main import login_user_id, msg_sender
+from main import msg_sender
 from error import NoStartEvent, MsgTypeError, NoMsg, NoMsgId
-from utils import get_logger
+from utils import get_logger, get_login_user_id
 
 
 class PluginCollection:
@@ -17,6 +17,7 @@ class PluginCollection:
         self.seen_paths = []
         self.plugin_package = plugin_package
         self.logger = get_logger('plugins_collection')
+        self.login_user_id = get_login_user_id()
         self.reload_plugins()
 
     def reload_plugins(self):
@@ -79,7 +80,7 @@ class PluginCollection:
         try:
             if kwargs['msg'][:13] == '[CQ:reply,id=':
                 msg_id = int(kwargs['msg'][13:].split(']')[0])
-                kwargs['msg'] = kwargs['msg'].split(f'[CQ:reply,id={msg_id}][CQ:at,qq={login_user_id}] ')[-1]
+                kwargs['msg'] = kwargs['msg'].split(f'[CQ:reply,id={msg_id}][CQ:at,qq={self.login_user_id}] ')[-1]
                 try:
                     plugin = msg_sender[msg_id]
                     kwargs['sub_type'] = 'reply'

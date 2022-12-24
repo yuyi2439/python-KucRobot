@@ -1,6 +1,6 @@
 import asyncio
+import sys
 import threading
-import requests
 import websockets.client
 import json
 import logging
@@ -11,22 +11,27 @@ log_level = logging.INFO
 
 version = '0.0.1'
 msg_sender = {}
-login_user_id = json.loads(requests.get(url=f'{http_addr}/get_login_info').content)['data']['user_id']
+connected = False
 
 
 async def receive_event():
-    logger.debug(f'连接WebSocket中')
+    global connected
+    logger.info(f'连接WebSocket中')
     try:
         async with websockets.connect(ws_addr) as w:
             logger.info(f'连接 {ws_addr} 成功，正在获取消息')
+            connected = True
             async for m in w:
                 msg = json.loads(m)
                 if msg['post_type'] != 'meta_event':
                     logger.debug(m)
                     await parse(msg)
-    except websockets.exceptions.ConnectionClosedError as e:
-        logger.error(f'websockets.exceptions.ConnectionClosedError {e}')
+    except websockets.exceptions.ConnectionClosedError:
+        logger.warning('ws连接断开了，正在尝试重连')
         await receive_event()
+    except ConnectionRefusedError:
+        logger.error('ws连接失败，请检查ws地址配置，并确认go-cqhttp是否正确运行')
+        sys.exit()
 
 
 async def parse(m):
@@ -51,10 +56,15 @@ class InputThread(threading.Thread):
     def run(self):
         while True:
             user_input = input()
-            if user_input == 'reload plugins':
+            if user_input == 'reload':
                 my_plugins.reload_plugins()
+            # elif user_input == 'connect':
+            #     if connected:
+            #         logger.info('已经连接了，不能重复连接')
+            #     else:
+            #         await receive_event()
             else:
-                logger.info(f'这不是一条指令')
+                logger.info('这不是一条指令')
 
 
 if __name__ == '__main__':

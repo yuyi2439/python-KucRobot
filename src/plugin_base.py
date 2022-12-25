@@ -1,6 +1,5 @@
 import error
 import plugin_utils
-import main
 from utils import get_logger, get_login_user_id
 
 
@@ -29,7 +28,7 @@ class Plugin:
         """
         raise error.NoStartEvent
 
-    async def group_msg_event(self, sub_type, msg_id, user_id, msg, group_id, anonymous, reply_msg_id: int):
+    def group_msg_event(self, sub_type, msg_id, user_id, msg, group_id, anonymous, reply_msg_id: int):
         """
         :param sub_type: 消息子类型, 正常消息是 normal, 匿名消息是 anonymous, 系统提示是 notice, 回复消息是 reply
         :param msg_id: 消息 ID
@@ -40,7 +39,7 @@ class Plugin:
         :param reply_msg_id: 当sub_type为reply时, 为本消息所回复的消息的msg_id, 否则为0
         """
 
-    async def private_msg_event(self, sub_type, msg_id, user_id, msg, *temp_source):
+    def private_msg_event(self, sub_type, msg_id, user_id, msg, *temp_source):
         """
         :param sub_type: 消息子类型, 正常消息是 normal, 匿名消息是 anonymous, 系统提示是 notice, 回复消息是 reply
         :param msg_id: 消息 ID
@@ -50,32 +49,32 @@ class Plugin:
         """
 
 
-async def send_group_msg(self, group_id, msg):
+def send_group_msg(self, group_id, msg):
     """
     :return: 成功返回msg_id
     """
-    return await plugin_utils.send_group_msg(self, group_id, msg)
+    return plugin_utils.send_group_msg(self, group_id, msg)
 
 
-async def send_private_msg(self, user_id, msg):
+def send_private_msg(self, user_id, msg):
     """
     :return: 成功返回msg_id
     """
-    return await plugin_utils.send_private_msg(self, user_id, msg)
+    return plugin_utils.send_private_msg(self, user_id, msg)
 
 
-async def get_msg(self, msg_id):
+def get_msg(self, msg_id):
     """
     :return: 成功返回data
     """
-    return await plugin_utils.get_msg(self, msg_id)
+    return plugin_utils.get_msg(self, msg_id)
 
 
-async def delete_msg(self, msg_id):
+def delete_msg(self, msg_id):
     """
     :return: 成功返回data
     """
-    return await plugin_utils.delete_msg(self, msg_id)
+    return plugin_utils.delete_msg(self, msg_id)
 
 
 class NoMsg(error.NoMsg):

@@ -7,7 +7,7 @@ from utils import get_logger
 logger = get_logger('plugins_collection')
 
 
-async def send_group_msg(self, group_id, msg):
+def send_group_msg(self, group_id, msg):
     """
     :return: 成功返回msg_id
     """
@@ -25,7 +25,7 @@ async def send_group_msg(self, group_id, msg):
     raise NoMsg
 
 
-async def send_private_msg(self, user_id, msg):
+def send_private_msg(self, user_id, msg):
     """
     :return: 成功返回msg_id
     """
@@ -43,7 +43,7 @@ async def send_private_msg(self, user_id, msg):
     raise NoMsg
 
 
-async def get_msg(self, msg_id):
+def get_msg(self, msg_id):
     """
     :return: 成功返回data
     """
@@ -59,7 +59,7 @@ async def get_msg(self, msg_id):
     raise NoMsgId
 
 
-async def delete_msg(self, msg_id):
+def delete_msg(self, msg_id):
     """
     :return: 成功返回data
     """

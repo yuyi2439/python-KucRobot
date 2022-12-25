@@ -76,7 +76,7 @@ class PluginCollection:
         #         for child_pkg in child_pkgs:
         #             self.walk_package(package + '.' + child_pkg)
 
-    async def msg_event(self, msg_type, **kwargs):
+    def msg_event(self, msg_type, **kwargs):
         try:
             if kwargs['msg'][:13] == '[CQ:reply,id=':
                 msg_id = int(kwargs['msg'][13:].split(']')[0])
@@ -85,16 +85,16 @@ class PluginCollection:
                     plugin = msg_sender[msg_id]
                     kwargs['sub_type'] = 'reply'
                     kwargs['reply_msg_id'] = msg_id
-                    await self._msg_event(plugin, msg_type, **kwargs)
+                    self._msg_event(plugin, msg_type, **kwargs)
                 except KeyError:
                     pass
             else:
                 for plugin in self.plugins:
-                    await self._msg_event(plugin, msg_type, **kwargs)
+                    self._msg_event(plugin, msg_type, **kwargs)
         except MsgTypeError as e:
             self.logger.warning(f'消息类型错误: {e}, msg_type: {msg_type}')
 
-    async def _msg_event(self, plugin, msg_type, **kwargs):
+    def _msg_event(self, plugin, msg_type, **kwargs):
         try:
             os.chdir(f'./plugins/{plugin.name}/')
             # 根据msg_type判断使用哪个方法
@@ -103,15 +103,15 @@ class PluginCollection:
                     kwargs['reply_msg_id']
                 except KeyError:
                     kwargs['reply_msg_id'] = 0
-                await plugin.group_msg_event(kwargs['sub_type'], kwargs['msg_id'], kwargs['user_id'], kwargs['msg'],
+                plugin.group_msg_event(kwargs['sub_type'], kwargs['msg_id'], kwargs['user_id'], kwargs['msg'],
                                              kwargs['group_id'], kwargs['anonymous'], kwargs['reply_msg_id'])
             elif msg_type == 'private':
                 if kwargs['sub_type'] == 'group':
-                    await plugin.private_msg_event(kwargs['sub_type'], kwargs['msg_id'],
+                    plugin.private_msg_event(kwargs['sub_type'], kwargs['msg_id'],
                                                    kwargs['user_id'], kwargs['msg'],
                                                    kwargs['temp_source'])
                 else:
-                    await plugin.private_msg_event(kwargs['sub_type'], kwargs['msg_id'],
+                    plugin.private_msg_event(kwargs['sub_type'], kwargs['msg_id'],
                                                    kwargs['user_id'], kwargs['msg'])
             else:
                 raise MsgTypeError

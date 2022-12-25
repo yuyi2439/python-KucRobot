@@ -37,16 +37,21 @@ async def receive_event():
 async def parse(m):
     if m['post_type'] == 'message':
         if m['message_type'] == 'group':
+            # 群消息
             await my_plugins.msg_event('group', sub_type=m['sub_type'], msg_id=m['message_id'],
                                        user_id=m['user_id'], msg=m['message'], group_id=m['group_id'],
                                        anonymous=m['anonymous'])
         elif m['message_type'] == 'private':
-            try:
-                m['temp_source']
-            except KeyError:
-                m['temp_source'] = ''
+            # 私聊消息
             await my_plugins.msg_event('private', sub_type=m['sub_type'], msg_id=m['message_id'],
                                        user_id=m['user_id'], msg=m['message'], temp_source=m['temp_source'])
+    elif m['post_type'] == 'notice':
+        if m['notice_type'] == 'group_increase':
+            # 群成员增加
+            pass
+        elif m['notice_type'] == 'group_decrease':
+            # 群成员减少
+            pass
 
 
 class InputThread(threading.Thread):

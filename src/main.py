@@ -1,17 +1,19 @@
 import asyncio
 import sys
 import threading
+import requests
 import websockets.client
 import json
 import logging
 
 ws_addr = 'ws://localhost:8080'
 http_addr = 'http://localhost:5700'
-log_level = logging.INFO
+log_level = logging.DEBUG
 
 version = '0.0.1'
 msg_sender = {}
 connected = False
+login_user_id = None
 
 
 async def receive_event():
@@ -21,6 +23,7 @@ async def receive_event():
         async with websockets.connect(ws_addr) as w:
             logger.info(f'连接 {ws_addr} 成功，正在获取消息')
             connected = True
+
             async for m in w:
                 msg = json.loads(m)
                 if msg['post_type'] != 'meta_event':
@@ -52,6 +55,15 @@ def parse(m):
         elif m['notice_type'] == 'group_decrease':
             # 群成员减少
             pass
+        elif m['notice_type'] == 'group_recall':
+            # 消群消息撤回
+            pass
+
+
+def ws_connected():
+    global login_user_id
+    if not login_user_id:
+        login_user_id = json.loads(requests.get(url=f'{http_addr}/get_login_info').content)['data']['user_id']
 
 
 class InputThread(threading.Thread):

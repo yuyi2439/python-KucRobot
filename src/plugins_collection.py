@@ -1,10 +1,9 @@
 import os
 import pkgutil
 import inspect
+from error import MsgTypeError, NoMsg, NoMsgId
+from utils import get_logger
 from plugin_base import Plugin
-from main import msg_sender
-from error import NoStartEvent, MsgTypeError, NoMsg, NoMsgId
-from utils import get_logger, get_login_user_id
 
 
 class PluginCollection:
@@ -17,18 +16,17 @@ class PluginCollection:
         self.seen_paths = []
         self.plugin_package = plugin_package
         self.logger = get_logger('plugins_collection')
-        self.login_user_id = get_login_user_id()
         self.reload_plugins()
 
     def reload_plugins(self):
         """
         重置plugins列表，遍历传入的package查询有效的插件
         """
-        self.logger.debug(f'加载plugins中')
+        self.logger.debug('加载plugins中')
         self.plugins = []
         self.seen_paths = []
         self.walk_package(self.plugin_package)
-        self.logger.info(f'plugins加载成功')
+        self.logger.info('plugins加载成功')
 
     def walk_package(self, package):
         """
@@ -42,84 +40,52 @@ class PluginCollection:
                 for (_, c) in cls_members:
                     # 仅加入Plugin类的子类，忽略掉Plugin本身
                     if issubclass(c, Plugin) and (c is not Plugin):
-                        # 加载插件
-                        if c().name == 'unknown' or c().version == 'unknown':
-                            self.logger.warning(
-                                f'加载插件类失败(插件名或版本未定义): {c.__module__}.{c.__name__}:{c().version}')
+                    # 加载插件
+                        if not c().name or not c().version or not c().author or not c().description:
+                            self.logger.warning(f'加载插件类失败(插件信息未完全定义): {c.__module__}.{c.__name__}')
+                            continue
+                        # 检查插件目录
                         plugin_dir = f'./plugins/{c().name}/'
                         if not os.path.isdir(plugin_dir):
                             os.mkdir(plugin_dir)
-                        try:
-                            c().start_event()
+                        # 执行插件初始化
+                        ret = c().on_load()
+                        if ret == 0:
                             self.plugins.append(c())
                             self.logger.info(f'加载插件类成功: {c.__module__}.{c.__name__}:{c().version}')
-                        except NoStartEvent:
-                            self.logger.warning(
-                                f'加载插件类失败(插件无启动事件): {c.__module__}.{c.__name__}:{c().version}')
+                        elif ret == -1:
+                            self.logger.warning(f'加载插件类失败(插件启动事件未成功): {c.__module__}.{c.__name__}:{c().version}')
 
-        # # 现在我们已经查找了当前package中的所有模块，现在我们递归查找子packages里的附件模块
-        # all_current_paths = []
-        # if isinstance(imported_package.__path__, str):
-        #     all_current_paths.append(imported_package.__path__)
-        # else:
-        #     all_current_paths.extend([x for x in imported_package.__path__])
-
-        # 加载子目录
-        # for pkg_path in all_current_paths:
-        #     if pkg_path not in self.seen_paths:
-        #         self.seen_paths.append(pkg_path)
-        #
-        #         # 获取当前package中的子目录
-        #         child_pkgs = [p for p in os.listdir(pkg_path) if os.path.isdir(os.path.join(pkg_path, p))]
-        #
-        #         # 递归遍历子目录的package
-        #         for child_pkg in child_pkgs:
-        #             self.walk_package(package + '.' + child_pkg)
 
     def msg_event(self, msg_type, **kwargs):
-        try:
-            if kwargs['msg'][:13] == '[CQ:reply,id=':
-                msg_id = int(kwargs['msg'][13:].split(']')[0])
-                kwargs['msg'] = kwargs['msg'].split(f'[CQ:reply,id={msg_id}][CQ:at,qq={self.login_user_id}] ')[-1]
-                try:
-                    plugin = msg_sender[msg_id]
-                    kwargs['sub_type'] = 'reply'
-                    kwargs['reply_msg_id'] = msg_id
-                    self._msg_event(plugin, msg_type, **kwargs)
-                except KeyError:
-                    pass
-            else:
-                for plugin in self.plugins:
-                    self._msg_event(plugin, msg_type, **kwargs)
-        except MsgTypeError as e:
-            self.logger.warning(f'消息类型错误: {e}, msg_type: {msg_type}')
-
-    def _msg_event(self, plugin, msg_type, **kwargs):
-        try:
-            os.chdir(f'./plugins/{plugin.name}/')
-            # 根据msg_type判断使用哪个方法
-            if msg_type == 'group':
-                try:
-                    kwargs['reply_msg_id']
-                except KeyError:
-                    kwargs['reply_msg_id'] = 0
-                plugin.group_msg_event(kwargs['sub_type'], kwargs['msg_id'], kwargs['user_id'], kwargs['msg'],
-                                             kwargs['group_id'], kwargs['anonymous'], kwargs['reply_msg_id'])
-            elif msg_type == 'private':
-                if kwargs['sub_type'] == 'group':
-                    plugin.private_msg_event(kwargs['sub_type'], kwargs['msg_id'],
-                                                   kwargs['user_id'], kwargs['msg'],
-                                                   kwargs['temp_source'])
+        for plugin in self.plugins:
+            try:
+                os.chdir(f'./plugins/{plugin.name}/')
+                # 根据msg_type判断使用哪个方法
+                if msg_type == 'group':
+                    try:
+                        kwargs['reply_msg_id']
+                    except KeyError:
+                        kwargs['reply_msg_id'] = 0
+                    plugin.group_msg_event(kwargs['sub_type'], kwargs['msg_id'], kwargs['user_id'], kwargs['msg'],
+                                           kwargs['group_id'], kwargs['anonymous'], kwargs['reply_msg_id'])
+                elif msg_type == 'private':
+                    if kwargs['sub_type'] == 'group':
+                        plugin.private_msg_event(kwargs['sub_type'], kwargs['msg_id'],
+                                                 kwargs['user_id'], kwargs['msg'],
+                                                 kwargs['temp_source'])
+                    else:
+                        plugin.private_msg_event(kwargs['sub_type'], kwargs['msg_id'],
+                                                 kwargs['user_id'], kwargs['msg'])
                 else:
-                    plugin.private_msg_event(kwargs['sub_type'], kwargs['msg_id'],
-                                                   kwargs['user_id'], kwargs['msg'])
-            else:
-                raise MsgTypeError
-        except NoMsg:
-            pass
-        except NoMsgId:
-            pass
-        except Exception as e:
-            self.logger.error(f'执行插件 {plugin.name} 时出错: {e}')
-        finally:
-            os.chdir(f'../../')
+                    raise MsgTypeError
+            except NoMsg:
+                pass
+            except NoMsgId:
+                pass
+            except MsgTypeError as e:
+                self.logger.warning(f'消息类型错误: {e}, msg_type: {msg_type}')
+            except Exception as e:
+                self.logger.error(f'执行插件 {plugin.name} 时出错: {e}')
+            finally:
+                os.chdir(f'../../')

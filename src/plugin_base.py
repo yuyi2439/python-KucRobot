@@ -1,6 +1,6 @@
 import error
 import plugin_utils
-from utils import get_logger, get_login_user_id
+import utils
 
 
 class Plugin:
@@ -11,22 +11,17 @@ class Plugin:
     def __init__(self):
         """
         插件的基础信息
-        日志初始化
         """
-        try:
-            self.name
-            self.version
-        except NameError:
-            self.name = 'unknown'
-            self.version = 'unknown'
-        self.logger = get_logger(f'{self.name}:{self.version}')
-        self.login_user_id = get_login_user_id()
+        self.name = None
+        self.version = None
+        self.author = None
+        self.description = None
 
-    def start_event(self):
+    def on_load(self):
         """
         实际执行插件所初始化的方法
         """
-        raise error.NoStartEvent
+        return -1
 
     def group_msg_event(self, sub_type, msg_id, user_id, msg, group_id, anonymous, reply_msg_id: int):
         """
@@ -48,33 +43,41 @@ class Plugin:
         :param temp_source: 临时会话来源
         """
 
+class Utils:
+    @staticmethod
+    def send_group_msg(self, group_id, msg):
+        """
+        :return: 成功返回msg_id
+        """
+        return plugin_utils.send_group_msg(self, group_id, msg)
 
-def send_group_msg(self, group_id, msg):
-    """
-    :return: 成功返回msg_id
-    """
-    return plugin_utils.send_group_msg(self, group_id, msg)
+    @staticmethod
+    def send_private_msg(self, user_id, msg):
+        """
+        :return: 成功返回msg_id
+        """
+        return plugin_utils.send_private_msg(self, user_id, msg)
 
+    @staticmethod
+    def get_msg(self, msg_id):
+        """
+        :return: 成功返回data
+        """
+        return plugin_utils.get_msg(self, msg_id)
 
-def send_private_msg(self, user_id, msg):
-    """
-    :return: 成功返回msg_id
-    """
-    return plugin_utils.send_private_msg(self, user_id, msg)
+    @staticmethod
+    def delete_msg(self, msg_id):
+        """
+        :return: 成功返回data
+        """
+        return plugin_utils.delete_msg(self, msg_id)
 
-
-def get_msg(self, msg_id):
-    """
-    :return: 成功返回data
-    """
-    return plugin_utils.get_msg(self, msg_id)
-
-
-def delete_msg(self, msg_id):
-    """
-    :return: 成功返回data
-    """
-    return plugin_utils.delete_msg(self, msg_id)
+    @staticmethod
+    def get_logger(self):
+        """
+        :return: 成功返回logger对象
+        """
+        return utils.get_logger(f'{self.name}:{self.version}')
 
 
 class NoMsg(error.NoMsg):

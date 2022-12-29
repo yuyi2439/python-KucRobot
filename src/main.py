@@ -27,7 +27,6 @@ async def receive_event():
             async for m in w:
                 msg = json.loads(m)
                 if msg['post_type'] != 'meta_event':
-                    logger.debug(m)
                     parse(msg)
     except websockets.exceptions.ConnectionClosedError:
         logger.warning('ws连接断开了，正在尝试重连')
@@ -41,13 +40,15 @@ def parse(m):
     if m['post_type'] == 'message':
         if m['message_type'] == 'group':
             # 群消息
-            my_plugins.msg_event('group', sub_type=m['sub_type'], msg_id=m['message_id'],
-                                       user_id=m['user_id'], msg=m['message'], group_id=m['group_id'],
-                                       anonymous=m['anonymous'])
+            plugins.msg_event('group', sub_type=m['sub_type'], msg_id=m['message_id'],
+                              user_id=m['user_id'], msg=m['message'], group_id=m['group_id'],
+                              anonymous=m['anonymous'])
         elif m['message_type'] == 'private':
             # 私聊消息
-            my_plugins.msg_event('private', sub_type=m['sub_type'], msg_id=m['message_id'],
-                                       user_id=m['user_id'], msg=m['message'], temp_source=m['temp_source'])
+            plugins.msg_event('private', sub_type=m['sub_type'], msg_id=m['message_id'],
+                              user_id=m['user_id'], msg=m['message'], temp_source=m['temp_source'])
+        else:
+            logger.debug(json.dumps(m))
     elif m['post_type'] == 'notice':
         if m['notice_type'] == 'group_increase':
             # 群成员增加
@@ -58,6 +59,10 @@ def parse(m):
         elif m['notice_type'] == 'group_recall':
             # 消群消息撤回
             pass
+        else:
+            logger.debug(json.dumps(m))
+    else:
+        logger.debug(json.dumps(m))
 
 
 def ws_connected():
@@ -74,7 +79,7 @@ class InputThread(threading.Thread):
         while True:
             user_input = input()
             if user_input == 'reload':
-                my_plugins.reload_plugins()
+                plugins.reload_plugins()
             # elif user_input == 'connect':
             #     if connected:
             #         logger.info('已经连接了，不能重复连接')
@@ -86,11 +91,12 @@ class InputThread(threading.Thread):
 
 if __name__ == '__main__':
     from utils import get_logger
-    from plugins_collection import PluginCollection
+    from plugins_manager import PluginManager
+
     logger = get_logger('main')
 
-    logger.info(f'kuc_robot:{version}正在启动')
-    my_plugins = PluginCollection('plugins')
+    logger.info(f'python-KucRobot:{version}正在启动')
+    plugins = PluginManager()
 
     input_thread = InputThread()
     input_thread.start()

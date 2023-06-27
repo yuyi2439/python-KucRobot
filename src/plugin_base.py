@@ -33,11 +33,11 @@ class Utils:
         return plugin_utils.delete_msg(self, msg_id)
 
     @staticmethod
-    def get_logger(self):
+    def get_logger(name):
         """
         :return: 成功返回logger对象
         """
-        return utils.get_logger(f'{self.name}:{self.version}')
+        return utils.get_logger(name)
 
 
 class NoMsg(error.NoMsg):

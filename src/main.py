@@ -1,39 +1,16 @@
 import asyncio
-import sys
 import threading
 import requests
-import websockets.client
 import json
 import logging
+from utils import GetLogger
 
 ws_addr = 'ws://localhost:8080'
 http_addr = 'http://localhost:5700'
 log_level = logging.DEBUG
 
 version = '0.0.1'
-msg_sender = {}
 connected = False
-login_user_id = None
-
-
-async def receive_event():
-    global connected
-    logger.info(f'连接WebSocket中')
-    try:
-        async with websockets.connect(ws_addr) as w:
-            logger.info(f'连接 {ws_addr} 成功，正在获取消息')
-            connected = True
-
-            async for m in w:
-                msg = json.loads(m)
-                if msg['post_type'] != 'meta_event':
-                    parse(msg)
-    except websockets.exceptions.ConnectionClosedError:
-        logger.warning('ws连接断开了，正在尝试重连')
-        await receive_event()
-    except ConnectionRefusedError:
-        logger.error('ws连接失败，请检查ws地址配置，并确认go-cqhttp是否正确运行')
-        sys.exit()
 
 
 def parse(m):
@@ -90,13 +67,14 @@ class InputThread(threading.Thread):
 
 
 if __name__ == '__main__':
-    from utils import get_logger
     from plugins_manager import PluginManager
+
+    get_logger = GetLogger(log_level).get_logger
 
     logger = get_logger('main')
 
     logger.info(f'python-KucRobot:{version}正在启动')
-    plugins = PluginManager()
+    plugins = PluginManager(get_logger)
 
     input_thread = InputThread()
     input_thread.start()

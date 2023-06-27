@@ -1,8 +1,7 @@
+import importlib
 import os
 import pkgutil
-import inspect
 from error import MsgTypeError, NoMsg, NoMsgId
-from utils import get_logger
 from plugin_base import Utils
 
 
@@ -11,7 +10,7 @@ class PluginManager:
     该类会通过传入的package查找继承了Plugin类的插件类
     """
 
-    def __init__(self):
+    def __init__(self, get_logger):
         self.plugins = []
         self.logger = get_logger('plugins_manager')
         self.reload_plugins()
@@ -29,27 +28,24 @@ class PluginManager:
         """
         递归遍历plugins包里获取所有的插件
         """
-        imported_package = __import__('plugins', fromlist=['blah'])
+        imported_package = importlib.import_module('plugins')
         for _, plugin_name, is_pkg in pkgutil.iter_modules(imported_package.__path__, imported_package.__name__ + '.'):
-            if not is_pkg:
-                plugin_module = __import__(plugin_name, fromlist=['blah'])
-                cls_members = inspect.getmembers(plugin_module, inspect.isclass)
-                for (_, c) in cls_members:
-                # 加载插件
-                    if not c().name or not c().version or not c().author or not c().description:
-                        self.logger.warning(f'加载插件类失败(插件信息未完全定义): {c.__module__}.{c.__name__}')
-                        continue
-                    # 检查插件目录
-                    plugin_dir = f'./plugins/{c().name}/'
-                    if not os.path.isdir(plugin_dir):
-                        os.mkdir(plugin_dir)
-                    # 执行插件初始化
-                    ret = c().on_load(Utils)
-                    if ret == 0:
-                        self.plugins.append(c())
-                        self.logger.info(f'加载插件类成功: {c.__module__}.{c.__name__}:{c().version}')
-                    elif ret == -1:
-                        self.logger.warning(f'加载插件类失败(插件启动事件未成功): {c.__module__}.{c.__name__}:{c().version}')
+            if is_pkg:
+                plg = importlib.import_module(plugin_name)
+                if not plg.name or not plg.version or not plg.author or not plg.description:
+                    self.logger.warning(f'加载插件类失败(插件信息未完全定义): {plg.__name__}')
+                    continue
+                # 检查插件目录
+                plugin_dir = f'./plugins/{plg.name}/'
+                if not os.path.isdir(plugin_dir):
+                    os.mkdir(plugin_dir)
+                # 执行插件初始化
+                ret = plg.on_load(Utils)
+                if ret == 0:
+                    self.plugins.append(plg)
+                    self.logger.info(f'加载插件类成功: {plg.name}:{plg.version}')
+                elif ret == -1:
+                    self.logger.warning(f'加载插件类失败(插件启动事件未成功): {plg.name}:{plg.version}')
 
 
     def msg_event(self, msg_type, **kwargs):

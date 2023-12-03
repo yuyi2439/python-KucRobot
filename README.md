@@ -1,3 +1,5 @@
+# 本项目已废弃，请使用[MyDM](https://github.com/yuyi2439/MyDM)
+
 # python-KucRobot
 
 ## 一些想法
